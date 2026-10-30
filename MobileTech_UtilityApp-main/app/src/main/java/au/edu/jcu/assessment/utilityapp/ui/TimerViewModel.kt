@@ -20,7 +20,8 @@ data class TimerUiState(
     val isRunning: Boolean = false,
     val isBreak: Boolean = false,
     val sessionsCompleted: Int = 0,
-    val advice: String = "Loading advice..."
+    val advice: String = "Loading advice...",
+    val message: String = ""
 )
 
 class TimerViewModel(private val repository: AdviceRepository) : ViewModel() {
@@ -39,7 +40,7 @@ class TimerViewModel(private val repository: AdviceRepository) : ViewModel() {
     }
 
     private fun start() {
-        _uiState.update { it.copy(isRunning = true) }
+        _uiState.update { it.copy(isRunning = true, message = "") }
         timerJob = viewModelScope.launch {
             while (_uiState.value.secondsLeft > 0) {
                 delay(1000)
@@ -56,18 +57,27 @@ class TimerViewModel(private val repository: AdviceRepository) : ViewModel() {
 
     private fun onTimerFinished() {
         if (_uiState.value.isBreak) {
-            // Break is over, back to focus
             _uiState.update {
-                it.copy(isBreak = false, isRunning = false, secondsLeft = it.focusMinutes * 60)
+                it.copy(
+                    isBreak = false,
+                    isRunning = false,
+                    secondsLeft = it.focusMinutes * 60,
+                    message = "Break over. Ready to focus?"
+                )
             }
         } else {
-            // Focus session done, count it and start the break
             _uiState.update {
+                val completed = it.sessionsCompleted + 1
                 it.copy(
                     isBreak = true,
                     isRunning = false,
                     secondsLeft = it.breakMinutes * 60,
-                    sessionsCompleted = it.sessionsCompleted + 1
+                    sessionsCompleted = completed,
+                    message = if (completed >= it.dailyGoal) {
+                        "Daily goal reached! Great work."
+                    } else {
+                        "Session complete! Take a break."
+                    }
                 )
             }
             loadAdvice()

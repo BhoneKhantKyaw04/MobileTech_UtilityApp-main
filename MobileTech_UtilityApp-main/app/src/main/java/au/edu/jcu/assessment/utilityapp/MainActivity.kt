@@ -133,6 +133,14 @@ fun UtilityScreen(
             style = MaterialTheme.typography.headlineMedium
         )
 
+        if (state.message.isNotEmpty()) {
+            Text(
+                text = state.message,
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
+
         Text(
             text = "%02d:%02d".format(minutes, seconds),
             style = MaterialTheme.typography.displayLarge
