@@ -42,7 +42,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import au.edu.jcu.assessment.utilityapp.ui.TimerUiState
 import au.edu.jcu.assessment.utilityapp.ui.TimerViewModel
 import au.edu.jcu.assessment.utilityapp.ui.TimerViewModelFactory
-
+import androidx.compose.material3.Slider
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,7 +97,12 @@ fun UtilityApp() {
                     onStartPause = timerViewModel::startPause,
                     onReset = timerViewModel::reset
                 )
-                "Settings" -> SettingsScreen()
+                "Settings" -> SettingsScreen(
+                    state = uiState,
+                    onFocusChange = timerViewModel::setFocusMinutes,
+                    onBreakChange = timerViewModel::setBreakMinutes,
+                    onGoalChange = timerViewModel::setDailyGoal
+                )
             }
         }
     }
@@ -164,13 +169,42 @@ fun UtilityScreen(
 }
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(
+    state: TimerUiState,
+    onFocusChange: (Int) -> Unit,
+    onBreakChange: (Int) -> Unit,
+    onGoalChange: (Int) -> Unit
+) {
     Column(
-        Modifier
+        modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp), Arrangement.spacedBy(16.dp)
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text("Settings Screen", style = MaterialTheme.typography.headlineMedium)
-        Text("This is where you can add toggles or preferences.")
+        Text("Settings", style = MaterialTheme.typography.headlineMedium)
+
+        Text("Focus length: ${state.focusMinutes} min")
+        Slider(
+            value = state.focusMinutes.toFloat(),
+            onValueChange = { onFocusChange(it.toInt()) },
+            valueRange = 1f..60f,
+            steps = 58
+        )
+
+        Text("Break length: ${state.breakMinutes} min")
+        Slider(
+            value = state.breakMinutes.toFloat(),
+            onValueChange = { onBreakChange(it.toInt()) },
+            valueRange = 1f..30f,
+            steps = 28
+        )
+
+        Text("Daily goal: ${state.dailyGoal} sessions")
+        Slider(
+            value = state.dailyGoal.toFloat(),
+            onValueChange = { onGoalChange(it.toInt()) },
+            valueRange = 1f..10f,
+            steps = 8
+        )
     }
 }

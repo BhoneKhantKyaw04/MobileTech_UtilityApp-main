@@ -81,6 +81,28 @@ class TimerViewModel(private val repository: AdviceRepository) : ViewModel() {
         }
     }
 
+    fun setFocusMinutes(minutes: Int) {
+        _uiState.update {
+            it.copy(
+                focusMinutes = minutes,
+                secondsLeft = if (!it.isRunning && !it.isBreak) minutes * 60 else it.secondsLeft
+            )
+        }
+    }
+
+    fun setBreakMinutes(minutes: Int) {
+        _uiState.update {
+            it.copy(
+                breakMinutes = minutes,
+                secondsLeft = if (!it.isRunning && it.isBreak) minutes * 60 else it.secondsLeft
+            )
+        }
+    }
+
+    fun setDailyGoal(goal: Int) {
+        _uiState.update { it.copy(dailyGoal = goal) }
+    }
+
     fun loadAdvice() {
         viewModelScope.launch {
             repository.getAdvice()
