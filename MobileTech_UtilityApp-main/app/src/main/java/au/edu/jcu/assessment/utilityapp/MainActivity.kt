@@ -29,6 +29,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import au.edu.jcu.assessment.utilityapp.ui.theme.MobileTech_UtilityAppTheme
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.viewmodel.compose.viewModel
+import au.edu.jcu.assessment.utilityapp.ui.TimerUiState
+import au.edu.jcu.assessment.utilityapp.ui.TimerViewModel
+import au.edu.jcu.assessment.utilityapp.ui.TimerViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,6 +65,11 @@ fun UtilityAppPreview() {
 
 @Composable
 fun UtilityApp() {
+    val container = remember { AppContainer() }
+    val timerViewModel: TimerViewModel = viewModel(
+        factory = TimerViewModelFactory(container.adviceRepository)
+    )
+    val uiState by timerViewModel.uiState.collectAsState()
     var selectedTab by remember { mutableStateOf("Utility") }
 
     Scaffold(
@@ -74,7 +92,11 @@ fun UtilityApp() {
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             when (selectedTab) {
-                "Utility" -> UtilityScreen()
+                "Utility" -> UtilityScreen(
+                    state = uiState,
+                    onStartPause = timerViewModel::startPause,
+                    onReset = timerViewModel::reset
+                )
                 "Settings" -> SettingsScreen()
             }
         }
@@ -82,20 +104,61 @@ fun UtilityApp() {
 }
 
 @Composable
-fun UtilityScreen() {
-    var counter by remember { mutableIntStateOf(0) }
+fun UtilityScreen(
+    state: TimerUiState,
+    onStartPause: () -> Unit,
+    onReset: () -> Unit
+) {
+    val minutes = state.secondsLeft / 60
+    val seconds = state.secondsLeft % 60
+    val goalProgress = (state.sessionsCompleted.toFloat() / state.dailyGoal).coerceIn(0f, 1f)
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        Text("Utility Screen", style = MaterialTheme.typography.headlineMedium)
-        Text("Counter: $counter", style = MaterialTheme.typography.bodyLarge)
+        Text(
+            text = if (state.isBreak) "Break time" else "Focus time",
+            style = MaterialTheme.typography.headlineMedium
+        )
 
-        Button(onClick = { counter++ }) {
-            Text("Increment")
+        Text(
+            text = "%02d:%02d".format(minutes, seconds),
+            style = MaterialTheme.typography.displayLarge
+        )
+
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Button(onClick = onStartPause) {
+                Text(if (state.isRunning) "Pause" else "Start")
+            }
+            OutlinedButton(onClick = onReset) {
+                Text("Reset")
+            }
+        }
+
+        Box(contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(
+                progress = { goalProgress },
+                modifier = Modifier.size(140.dp),
+                strokeWidth = 10.dp
+            )
+            Text(
+                text = "${state.sessionsCompleted} / ${state.dailyGoal}",
+                style = MaterialTheme.typography.titleLarge
+            )
+        }
+        Text("Daily goal: sessions completed", style = MaterialTheme.typography.bodyMedium)
+
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = state.advice,
+                modifier = Modifier.padding(16.dp),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyLarge
+            )
         }
     }
 }
