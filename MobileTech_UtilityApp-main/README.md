@@ -13,6 +13,7 @@ Built with Kotlin and Jetpack Compose for the Mobile Computing utility app asses
 - **Error handling:** if the advice cannot be loaded, the app shows a friendly message instead of crashing.
 - **Advice card:** fetches a piece of advice from the Advice Slip web API on launch and whenever a focus session is completed. A **New advice** button loads another one on demand.
 - **Error handling:** if the advice cannot be loaded (for example, no internet), the app shows a friendly message and the user can tap **New advice** to retry. It never crashes.
+- **Session messages:** the app tells you when a session or break ends and when the daily goal is reached.
 
 ## How it is built
 
