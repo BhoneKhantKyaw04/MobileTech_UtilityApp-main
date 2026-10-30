@@ -43,6 +43,7 @@ import au.edu.jcu.assessment.utilityapp.ui.TimerUiState
 import au.edu.jcu.assessment.utilityapp.ui.TimerViewModel
 import au.edu.jcu.assessment.utilityapp.ui.TimerViewModelFactory
 import androidx.compose.material3.Slider
+import androidx.compose.material3.TextButton
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,7 +96,8 @@ fun UtilityApp() {
                 "Utility" -> UtilityScreen(
                     state = uiState,
                     onStartPause = timerViewModel::startPause,
-                    onReset = timerViewModel::reset
+                    onReset = timerViewModel::reset,
+                    onRefreshAdvice = timerViewModel::loadAdvice
                 )
                 "Settings" -> SettingsScreen(
                     state = uiState,
@@ -112,7 +114,8 @@ fun UtilityApp() {
 fun UtilityScreen(
     state: TimerUiState,
     onStartPause: () -> Unit,
-    onReset: () -> Unit
+    onReset: () -> Unit,
+    onRefreshAdvice: () -> Unit
 ) {
     val minutes = state.secondsLeft / 60
     val seconds = state.secondsLeft % 60
@@ -158,12 +161,19 @@ fun UtilityScreen(
         Text("Daily goal: sessions completed", style = MaterialTheme.typography.bodyMedium)
 
         Card(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = state.advice,
+            Column(
                 modifier = Modifier.padding(16.dp),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyLarge
-            )
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = state.advice,
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                TextButton(onClick = onRefreshAdvice) {
+                    Text("New advice")
+                }
+            }
         }
     }
 }

@@ -104,10 +104,11 @@ class TimerViewModel(private val repository: AdviceRepository) : ViewModel() {
     }
 
     fun loadAdvice() {
+        _uiState.update { it.copy(advice = "Loading advice...") }
         viewModelScope.launch {
             repository.getAdvice()
                 .onSuccess { text -> _uiState.update { it.copy(advice = text) } }
-                .onFailure { _uiState.update { it.copy(advice = "Couldn't load advice. Check your internet.") } }
+                .onFailure { _uiState.update { it.copy(advice = "Couldn't load advice. Check your internet and tap refresh.") } }
         }
     }
 }
