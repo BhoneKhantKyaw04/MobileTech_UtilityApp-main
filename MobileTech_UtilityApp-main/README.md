@@ -11,6 +11,8 @@ Built with Kotlin and Jetpack Compose for the Mobile Computing utility app asses
 - **Advice card:** fetches a piece of advice from the Advice Slip web API on launch and whenever a focus session is completed.
 - **Settings screen:** sliders for focus length (1-60 min), break length (1-30 min) and daily goal (1-10 sessions). Changes affect the main screen straight away. Settings are not persistent, as allowed by the brief.
 - **Error handling:** if the advice cannot be loaded, the app shows a friendly message instead of crashing.
+- **Advice card:** fetches a piece of advice from the Advice Slip web API on launch and whenever a focus session is completed. A **New advice** button loads another one on demand.
+- **Error handling:** if the advice cannot be loaded (for example, no internet), the app shows a friendly message and the user can tap **New advice** to retry. It never crashes.
 
 ## How it is built
 
