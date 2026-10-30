@@ -1,55 +1,59 @@
-# MobileTech Utility App
+# Study Focus Timer
 
-This is a basic Android app template for **Assessment 1: Utility App**.
-It provides the structure for a simple tabular UI using **Jetpack Compose** and **Material Design 3**.
+A utility-style Android app for students. It runs a Pomodoro-style focus timer, tracks daily focus sessions against a goal, and shows a piece of advice from a web API for each session.
 
----
+Built with Kotlin and Jetpack Compose for the Mobile Computing utility app assessment.
 
-## Getting Started
+## Core features
 
-### How to Run
-1. Clone or download this repo  
-2. Open in Android Studio  
-3. Run on an emulator or physical device (API 26+ recommended)  
+- **Focus and break timer:** start, pause and reset a countdown. When a focus session ends, the app switches to break mode, and when the break ends it goes back to focus mode.
+- **Daily goal progress ring:** shows completed focus sessions against the daily goal (for example 2 / 4) at a glance.
+- **Advice card:** fetches a piece of advice from the Advice Slip web API on launch and whenever a focus session is completed.
+- **Settings screen:** sliders for focus length (1-60 min), break length (1-30 min) and daily goal (1-10 sessions). Changes affect the main screen straight away. Settings are not persistent, as allowed by the brief.
+- **Error handling:** if the advice cannot be loaded, the app shows a friendly message instead of crashing.
 
----
+## How it is built
 
-## Composables
+| Topic | Implementation |
+|---|---|
+| Language and UI | Kotlin, Jetpack Compose, Material Design 3 (cards, sliders, progress indicator, navigation bar) |
+| Navigation | Single activity with a bottom navigation bar switching between `UtilityScreen` and `SettingsScreen` |
+| ViewModel | `TimerViewModel` holds all timer state in one `TimerUiState` object exposed as a `StateFlow`. The timer runs in `viewModelScope`, so it survives screen rotation. |
+| Repository pattern | `AdviceRepository` is the only class that talks to the API. It returns a `Result`, so failures are handled without crashes. |
+| Dependency injection | Manual DI through `AppContainer`, which builds the Retrofit instance and repository once. `TimerViewModelFactory` passes the repository into the ViewModel. |
+| Web API (Retrofit) | `AdviceApi` defines a `suspend` GET request to `https://api.adviceslip.com/advice`. Gson converts the JSON into `AdviceResponse` and `Slip` data classes. |
+| State handling | The UI observes `uiState` with `collectAsState()`, and the screens receive state and callbacks, so they hold no business logic. |
 
-### UtilityApp()
-- Contains the screen layout using a Scaffold
-- Toggles content between Utility and Settings
+## Weeks 1-5 coverage
 
-### UtilityScreen()
-- Displays a simple counter (replace with your utility logic)  
-- Includes a button to increment the counter
+| Week | Concept | Where it is used |
+|------|---------|------------------|
+| 1 | Kotlin and Android Studio | Whole project, with `MainActivity.kt` as the entry point |
+| 2 | Layouts with Jetpack Compose | `UtilityApp()`, `UtilityScreen()`, `SettingsScreen()` |
+| 3 | Material Design 3 | `MaterialTheme`, `Card`, `Slider`, `CircularProgressIndicator`, `NavigationBar` |
+| 4 | App architecture | `TimerViewModel`, `AdviceRepository`, `AppContainer` (manual DI) |
+| 5 | Web APIs with Retrofit | `AdviceApi`, `AdviceResponse`, Gson converter |
 
-### SettingsScreen()
-- Placeholder for user preferences or configuration  
-- Can be extended to modify main screen behavior (e.g., theme, units, limits)  
+## Project structure
 
----
+```
+au.edu.jcu.assessment.utilityapp
+├── MainActivity.kt        UtilityApp, UtilityScreen, SettingsScreen
+├── AppContainer.kt        manual dependency injection
+├── data/
+│   ├── AdviceApi.kt       Retrofit interface
+│   ├── AdviceResponse.kt  response data classes
+│   └── AdviceRepository.kt
+└── ui/
+    └── TimerViewModel.kt  state, timer logic, factory
+```
 
-## Key Concepts Covered
+## How to run
 
-| Week | Concept                        | Used In                          |
-|------|--------------------------------|----------------------------------|
-| 1    | Kotlin + Android Studio         | MainActivity.kt |
-| 2    | Jetpack Compose Layouts         | UtilityApp(), UtilityScreen(), SettingsScreen()   |
-| 3    | Material Design 3               | MobileTechUtilityAppTheme, MaterialTheme.typography |
-| 4    | ViewModel | Not included in starter          |
-| 5    | Retrofit  | Not included in starter          |
+1. Clone the repo and open it in Android Studio (open the folder that contains `settings.gradle.kts`).
+2. Let Gradle sync.
+3. Run on an emulator or a physical device (API 26+). The device needs internet access for the advice feature.
 
----
+## Version control
 
-## Suggested Extensions
-- Replace counter with a real utility (e.g., hydration tracker, timer)  
-- Add a ViewModel for state management  
-- Use SharedPreferences or DataStore to persist settings  
-- Add a simple API call using Retrofit (e.g., fetch weather or quotes)  
-
----
-
-## 📚 License
-This template is provided for educational use in CP3406.  
-Feel free to modify and extend it for your assessment.
+Developed with regular commits on GitHub, one for each feature (project setup, data layer, ViewModel, UI, settings).
